@@ -5,6 +5,7 @@ import bs4
 from loguru import logger
 import multiprocessing as mp
 import tqdm
+from absl import app, flags
 
 import warnings
 warnings.filterwarnings("ignore", category=bs4.MarkupResemblesLocatorWarning, module='bs4')
@@ -12,6 +13,10 @@ warnings.filterwarnings("ignore", category=bs4.MarkupResemblesLocatorWarning, mo
 DATA_FN = 'pol_062016-112019_labeled.ndjson'
 OUT_FN = 'kek.txt'
 
+flags.DEFINE_string('data_fn', DATA_FN, 'data file')
+flags.DEFINE_string('out_fn', OUT_FN, 'output file')
+
+FLAGS = flags.FLAGS
 
 # from here: https://gist.github.com/zmwangx/ad0830ba94b1fd98f428
 def text_with_newlines(elem):
@@ -42,13 +47,13 @@ def parse_line(line):
     return '\n'.join(posts_text)
 
 
-def main():
-    with open(OUT_FN, 'w') as out_f:
-        with open(DATA_FN) as in_f:
+def main(_):
+    with open(FLAGS.out_fn, 'w') as out_f:
+        with open(FLAGS.data_fn) as in_f:
             with mp.Pool() as pool:
                 for parsed_line in pool.imap(parse_line, tqdm.tqdm(in_f)):
                     out_f.write(parsed_line + '\n-----\n')
 
 
 if __name__ == '__main__':
-    main()
+    app.run(main)
