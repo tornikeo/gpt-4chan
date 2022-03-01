@@ -1,3 +1,5 @@
 loguru
 beautifulsoup4
 tqdm
+tokenizers
+tensorflow

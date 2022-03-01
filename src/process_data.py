@@ -10,8 +10,8 @@ from absl import app, flags
 import warnings
 warnings.filterwarnings("ignore", category=bs4.MarkupResemblesLocatorWarning, module='bs4')
 
-DATA_FN = 'pol_062016-112019_labeled.ndjson'
-OUT_FN = 'kek.txt'
+DATA_FN = '../tmp/pol_062016-112019_labeled.ndjson'
+OUT_FN = '../tmp/kek.txt'
 
 flags.DEFINE_string('data_fn', DATA_FN, 'data file')
 flags.DEFINE_string('out_fn', OUT_FN, 'output file')
