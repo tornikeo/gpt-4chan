@@ -234,6 +234,13 @@ export default function Home() {
             checked={showRaw}
             onChange={(ev) => setShowRaw(ev.target.checked)}
           />
+      <button
+        type="button"
+        onClick={() => setRawText("")}
+        className="border border-solid border-b-2 border-stone-500 rounded p-1 ml-3"
+      >
+        Clear all
+      </button>
         </div>
         {showRaw ? (
           <RawForm rawText={rawText} setRawText={setRawText} />
