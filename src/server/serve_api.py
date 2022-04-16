@@ -22,7 +22,13 @@ app.add_middleware(
         allow_headers=["*"],
         )
 
-request_queue = queue.Queue()
+class Settings(pydantic.BaseSettings):
+    queue_size: int = 1024
+    log_file: str = "logs/serve_api.log"
+
+settings = Settings()
+
+request_queue = queue.Queue(maxsize=settings.queue_size)
 response_queue = queue.Queue()
 
 def worker():
@@ -31,20 +37,34 @@ def worker():
     model = inference.Inference(path="../model_slim/step_88001/")
     with jax.experimental.maps.mesh(inference._devices, ("dp", "mp")):
         while True:
-            start_time = time.time()
-            request = request_queue.get()
-            logger.info(f"getting request took {time.time() - start_time}")
-            start_time = time.time()
-            response = model.generate(
-                    prompt=request.prompt,
-                    length=request.length,
-                    top_p=request.top_p,
-                    temperature=request.temperature,
-                    )
-            logger.info(f"generate took {time.time() - start_time}")
-            start_time = time.time()
-            response_queue.put(response)
-            logger.info(f"putting response took {time.time() - start_time}")
+            try:
+                start_time = time.time()
+                request = request_queue.get()
+                logger.info(f"getting request took {time.time() - start_time}")
+                start_time = time.time()
+                response = model.generate(
+                        prompt=request.prompt,
+                        length=request.length,
+                        top_p=request.top_p,
+                        temperature=request.temperature,
+                        )
+                logger.info(f"generate took {time.time() - start_time}")
+                start_time = time.time()
+                with open(settings.log_file, "a") as f:
+                    f.write(f"##### {time.time()} #####\n")
+                    f.write(f"{request.prompt}\n")
+                    f.write("#####\n")
+                    f.write(f"{response}\n\n")
+                logger.info(f"writing log took {time.time() - start_time}")
+                start_time = time.time()
+                response_queue.put(response)
+                logger.info(f"putting response took {time.time() - start_time}")
+            except KeyboardInterrupt:
+                logger.info(f"Got KeyboardInterrupt... quitting!")
+                raise
+            except Exception:
+                logger.exception(f"Got exception, will continue")
+                response_queue.put("")
 
 @app.on_event("startup")
 def startup():
@@ -58,13 +78,17 @@ async def main():
     return {"response": "Hello, world!"}
 
 class CompleteRequest(pydantic.BaseModel):
-    prompt: str
-    length: Optional[int] = 128
-    top_p: Optional[float] = 1.0
-    temperature: Optional[float] = 1.0
+    prompt: pydantic.constr(min_length=1, max_length=1024)
+    length: pydantic.conint(ge=1, le=1024) = 128
+    top_p: pydantic.confloat(ge=0.0, le=1.0) = 1.0
+    temperature: pydantic.confloat(ge=0.0) = 1.0
 
 @app.post("/complete")
 def complete(request: CompleteRequest):
+    logger.info(f"Received request. Queue size is {request_queue.qsize()}")
+    if request_queue.full():
+        logger.warning("Request queue full.")
+        raise ValueError("Request queue full.")
     request_queue.put(request)
     response = response_queue.get()
     return {"response": response}
