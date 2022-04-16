@@ -85,8 +85,8 @@ export default function Home() {
   const [loading, setLoading] = React.useState(false);
 
   const [generationLength, setGenerationLength] = React.useState(128);
-  const [generationP, setGenerationP] = React.useState(0.8);
-  const [generationTemperature, setGenerationTemperature] = React.useState(2.0);
+  const [generationP, setGenerationP] = React.useState(0.9);
+  const [generationTemperature, setGenerationTemperature] = React.useState(0.8);
   const generationSettings = [
     {
       label: "Length",
