@@ -224,7 +224,7 @@ export default function Home() {
       <main className="">
         <div className="flex flex-col text-center mt-5">
           <h1 className="text-3xl font-bold">GPT-4chan Playground</h1>
-          <p className="">This is a playground for GPT-4chan.</p>
+          <p className="">TRIGGER WARNING: This thing is vile. Proceed at your own risk.</p>
         </div>
         <div className="flex justify-end mx-5">
           <Checkbox
