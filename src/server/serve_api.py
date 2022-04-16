@@ -29,7 +29,6 @@ class Settings(pydantic.BaseSettings):
 settings = Settings()
 
 request_queue = queue.Queue(maxsize=settings.queue_size)
-response_queue = queue.Queue()
 
 def worker():
     from model import inference
@@ -39,7 +38,7 @@ def worker():
         while True:
             try:
                 start_time = time.time()
-                request = request_queue.get()
+                (request, response_queue) = request_queue.get()
                 logger.info(f"getting request took {time.time() - start_time}")
                 start_time = time.time()
                 response = model.generate(
@@ -89,6 +88,7 @@ def complete(request: CompleteRequest):
     if request_queue.full():
         logger.warning("Request queue full.")
         raise ValueError("Request queue full.")
-    request_queue.put(request)
+    response_queue = queue.Queue()
+    request_queue.put((request, response_queue))
     response = response_queue.get()
     return {"response": response}
