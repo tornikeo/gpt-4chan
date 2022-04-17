@@ -1,9 +1,18 @@
 import axios from "axios";
 import getConfig from "next/config";
+import Cors from 'cors';
+import initMiddleware from '../../utils/init-middleware';
 
 const { serverRuntimeConfig } = getConfig();
 
+// Initialize the cors middleware
+const cors = initMiddleware(
+  // You can read more about the available options here: https://github.com/expressjs/cors#configuration-options
+  Cors({})
+)
+
 export default async function handler(req, res) {
+  await cors(req, res);
   if (req.method == "POST") {
     const {
       body
