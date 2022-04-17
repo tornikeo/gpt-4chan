@@ -1,5 +1,6 @@
 import React from "react";
 import Head from "next/head";
+import Link from "next/link";
 import Checkbox from "@material-tailwind/react/Checkbox";
 import Input from "@material-tailwind/react/Input";
 import getConfig from "next/config";
@@ -215,7 +216,7 @@ export default function Home() {
   }, [posts]);
 
   return (
-    <div className="">
+    <div className="relative pb-24">
       <Head>
         <title>GPT-4chan Playground</title>
         <link rel="icon" href="/favicon.ico" />
@@ -281,7 +282,13 @@ export default function Home() {
         )}
       </main>
 
-      <footer className=""></footer>
+      <footer className="absolute bottom-0 w-full">
+        <div className="text-center text-xs w-full">
+        <Link href="/privacypolicy">
+          <a className="text-gray-500">Privacy Policy</a>
+        </Link>
+        </div>
+      </footer>
     </div>
   );
 }
