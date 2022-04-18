@@ -213,7 +213,7 @@ export default function Home() {
     if (posts.length === 0) {
       setPosts([createPost()]);
     }
-  }, [posts]);
+  }, [posts, setPosts]);
 
   return (
     <div className="relative pb-24">
