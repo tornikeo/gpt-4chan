@@ -153,10 +153,17 @@ export default function Home() {
     }
   }
 
-  function setPosts(posts) {
+  const getFullPrompt = React.useCallback((posts) => {
+    return [
+      THREAD_PREFIX,
+      ...posts.map((post) => `${POST_PREFIX} ${post.postId}\n${post.text}`),
+    ].join("\n");
+  }, []);
+
+  const setPosts = React.useCallback((posts) => {
     const fullPrompt = getFullPrompt(posts);
     setRawText(fullPrompt);
-  }
+  }, [getFullPrompt, setRawText]);
 
   function createPost() {
     return {
@@ -189,7 +196,9 @@ export default function Home() {
     })
     .filter((thread) => thread !== null);
 
-  const posts = threads.length ? threads[0] : [];
+  const posts = React.useMemo(() => (threads.length ? threads[0] : []), [
+    threads,
+  ]);
 
   function setPostText(postId, text) {
     const postIndex = posts.findIndex((p) => p.postId === postId);
@@ -202,12 +211,6 @@ export default function Home() {
     ]);
   }
 
-  function getFullPrompt(posts) {
-    return [
-      THREAD_PREFIX,
-      ...posts.map((post) => `${POST_PREFIX} ${post.postId}\n${post.text}`),
-    ].join("\n");
-  }
 
   React.useEffect(() => {
     if (posts.length === 0) {
